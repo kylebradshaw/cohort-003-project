@@ -19,7 +19,7 @@ import { formatDuration } from "~/lib/utils";
 export function meta({ data: loaderData }: Route.MetaArgs) {
   const title = loaderData?.course?.title ?? "Course";
   return [
-    { title: `${title} — Ralph` },
+    { title: `${title} — Cadence` },
     { name: "description", content: loaderData?.course?.description ?? "" },
   ];
 }

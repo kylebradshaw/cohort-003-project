@@ -13,7 +13,7 @@ import { calculateProgress, getCompletedLessonCount } from "~/services/progressS
 
 export function meta() {
   return [
-    { title: "Browse Courses — Ralph" },
+    { title: "Browse Courses — Cadence" },
     { name: "description", content: "Browse all available courses" },
   ];
 }

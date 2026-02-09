@@ -20,7 +20,7 @@ import { data, isRouteErrorResponse } from "react-router";
 export function meta({ data: loaderData }: Route.MetaArgs) {
   const title = loaderData?.lesson?.title ?? "Edit Lesson";
   return [
-    { title: `Edit: ${title} — Ralph` },
+    { title: `Edit: ${title} — Cadence` },
     { name: "description", content: `Edit lesson: ${title}` },
   ];
 }

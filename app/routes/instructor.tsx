@@ -14,7 +14,7 @@ import { CourseStatus, UserRole } from "~/db/schema";
 
 export function meta() {
   return [
-    { title: "My Courses — Ralph" },
+    { title: "My Courses — Cadence" },
     { name: "description", content: "Manage your courses" },
   ];
 }

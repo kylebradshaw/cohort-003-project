@@ -15,7 +15,7 @@ import { data, isRouteErrorResponse, Link } from "react-router";
 
 export function meta() {
   return [
-    { title: "Settings — Ralph" },
+    { title: "Settings — Cadence" },
     { name: "description", content: "Edit your profile details" },
   ];
 }

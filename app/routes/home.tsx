@@ -13,7 +13,7 @@ import { getCurrentUserId } from "~/lib/session";
 
 export function meta({}: Route.MetaArgs) {
   return [
-    { title: "Ralph — Learn at your own pace" },
+    { title: "Cadence — Learn at your own pace" },
     { name: "description", content: "A modern course platform for developers. Browse courses, track your progress, and learn at your own pace." },
   ];
 }
@@ -53,7 +53,7 @@ export default function Home({ loaderData }: Route.ComponentProps) {
     setIsDark(next);
     document.documentElement.classList.toggle("dark", next);
     try {
-      localStorage.setItem("ralph-theme", next ? "dark" : "light");
+      localStorage.setItem("cadence-theme", next ? "dark" : "light");
     } catch {}
   }
 
@@ -62,7 +62,7 @@ export default function Home({ loaderData }: Route.ComponentProps) {
       <header className="border-b border-border">
         <div className="mx-auto flex h-16 max-w-6xl items-center justify-between px-6">
           <Link to="/" className="text-xl font-bold tracking-tight">
-            Ralph
+            Cadence
           </Link>
           <nav className="flex items-center gap-6">
             <Link
@@ -185,7 +185,7 @@ export default function Home({ loaderData }: Route.ComponentProps) {
 
       <footer className="border-t border-border py-8">
         <div className="mx-auto max-w-6xl px-6 text-center text-sm text-muted-foreground">
-          Ralph Course Platform
+          Cadence
         </div>
       </footer>
 

@@ -45,7 +45,7 @@ export function meta({ data: loaderData }: Route.MetaArgs) {
   const title = loaderData?.lesson?.title ?? "Lesson";
   const courseTitle = loaderData?.course?.title ?? "Course";
   return [
-    { title: `${title} — ${courseTitle} — Ralph` },
+    { title: `${title} — ${courseTitle} — Cadence` },
   ];
 }
 

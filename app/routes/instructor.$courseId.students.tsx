@@ -18,7 +18,7 @@ import { eq } from "drizzle-orm";
 export function meta({ data: loaderData }: Route.MetaArgs) {
   const title = loaderData?.course?.title ?? "Student Roster";
   return [
-    { title: `Students: ${title} — Ralph` },
+    { title: `Students: ${title} — Cadence` },
     { name: "description", content: `Enrolled students for ${title}` },
   ];
 }

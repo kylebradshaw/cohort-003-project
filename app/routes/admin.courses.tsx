@@ -26,7 +26,7 @@ import { data, isRouteErrorResponse, Link } from "react-router";
 
 export function meta() {
   return [
-    { title: "Manage Courses — Ralph" },
+    { title: "Manage Courses — Cadence" },
     { name: "description", content: "Manage all platform courses" },
   ];
 }

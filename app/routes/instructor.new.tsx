@@ -23,7 +23,7 @@ import { data, isRouteErrorResponse } from "react-router";
 
 export function meta() {
   return [
-    { title: "New Course — Ralph" },
+    { title: "New Course — Cadence" },
     { name: "description", content: "Create a new course" },
   ];
 }

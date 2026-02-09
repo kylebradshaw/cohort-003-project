@@ -21,7 +21,7 @@ import { data, isRouteErrorResponse, Link } from "react-router";
 
 export function meta() {
   return [
-    { title: "Manage Users — Ralph" },
+    { title: "Manage Users — Cadence" },
     { name: "description", content: "Manage platform users" },
   ];
 }
