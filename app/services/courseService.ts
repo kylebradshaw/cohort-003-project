@@ -82,6 +82,7 @@ export function buildCourseQuery(
       createdAt: courses.createdAt,
       updatedAt: courses.updatedAt,
       instructorName: users.name,
+      instructorAvatarUrl: users.avatarUrl,
       categoryName: categories.name,
     })
     .from(courses)
@@ -121,6 +122,7 @@ export function getCourseWithDetails(id: number) {
       createdAt: courses.createdAt,
       updatedAt: courses.updatedAt,
       instructorName: users.name,
+      instructorAvatarUrl: users.avatarUrl,
       instructorBio: users.bio,
       categoryName: categories.name,
     })

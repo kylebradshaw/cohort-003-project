@@ -2,6 +2,7 @@ import { NavLink, Form } from "react-router";
 import { useState, useEffect } from "react";
 import { cn } from "~/lib/utils";
 import { UserRole } from "~/db/schema";
+import { UserAvatar } from "~/components/user-avatar";
 import {
   BookOpen,
   LayoutDashboard,
@@ -80,31 +81,6 @@ function isVisible(item: NavItem, role: UserRole | null): boolean {
   if (item.roles === "all") return true;
   if (!role) return false;
   return item.roles.includes(role);
-}
-
-function UserAvatar({ name, avatarUrl }: { name: string; avatarUrl: string | null }) {
-  const initials = name
-    .split(" ")
-    .map((n) => n[0])
-    .join("")
-    .slice(0, 2)
-    .toUpperCase();
-
-  if (avatarUrl) {
-    return (
-      <img
-        src={avatarUrl}
-        alt={name}
-        className="size-8 rounded-full object-cover"
-      />
-    );
-  }
-
-  return (
-    <div className="flex size-8 items-center justify-center rounded-full bg-sidebar-accent text-xs font-medium text-sidebar-accent-foreground">
-      {initials}
-    </div>
-  );
 }
 
 export function Sidebar({ currentUser, recentCourses = [] }: SidebarProps) {

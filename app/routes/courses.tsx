@@ -5,8 +5,9 @@ import { CourseStatus } from "~/db/schema";
 import { Card, CardContent, CardFooter, CardHeader } from "~/components/ui/card";
 import { Button } from "~/components/ui/button";
 import { Skeleton } from "~/components/ui/skeleton";
-import { AlertTriangle, BookOpen, Search, User } from "lucide-react";
+import { AlertTriangle, BookOpen, Search } from "lucide-react";
 import { CourseImage } from "~/components/course-image";
+import { UserAvatar } from "~/components/user-avatar";
 import { getCurrentUserId } from "~/lib/session";
 import { getUserEnrolledCourses } from "~/services/enrollmentService";
 import { calculateProgress, getCompletedLessonCount } from "~/services/progressService";
@@ -212,8 +213,12 @@ export default function CourseCatalog({ loaderData }: Route.ComponentProps) {
                   </CardContent>
                 )}
                 <CardFooter className="flex items-center justify-between text-xs text-muted-foreground">
-                  <span className="flex items-center gap-1">
-                    <User className="size-3" />
+                  <span className="flex items-center gap-1.5">
+                    <UserAvatar
+                      name={course.instructorName}
+                      avatarUrl={course.instructorAvatarUrl}
+                      className="size-5"
+                    />
                     {course.instructorName}
                   </span>
                   <span className="flex items-center gap-1">

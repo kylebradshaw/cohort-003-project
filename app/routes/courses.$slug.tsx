@@ -11,8 +11,9 @@ import { LessonProgressStatus } from "~/db/schema";
 import { Card, CardContent, CardHeader } from "~/components/ui/card";
 import { Button } from "~/components/ui/button";
 import { Skeleton } from "~/components/ui/skeleton";
-import { AlertTriangle, BookOpen, CheckCircle2, Circle, Clock, PlayCircle, User } from "lucide-react";
+import { AlertTriangle, BookOpen, CheckCircle2, Circle, Clock, PlayCircle } from "lucide-react";
 import { CourseImage } from "~/components/course-image";
+import { UserAvatar } from "~/components/user-avatar";
 import { data, isRouteErrorResponse } from "react-router";
 import { formatDuration } from "~/lib/utils";
 
@@ -208,8 +209,12 @@ export default function CourseDetail({ loaderData }: Route.ComponentProps) {
               <h1 className="mb-3 text-3xl font-bold">{course.title}</h1>
               <p className="mb-4 text-muted-foreground">{course.description}</p>
               <div className="flex items-center gap-4 text-sm text-muted-foreground">
-                <span className="flex items-center gap-1">
-                  <User className="size-4" />
+                <span className="flex items-center gap-1.5">
+                  <UserAvatar
+                    name={course.instructorName}
+                    avatarUrl={course.instructorAvatarUrl}
+                    className="size-5"
+                  />
                   {course.instructorName}
                 </span>
                 <span className="flex items-center gap-1">
@@ -275,8 +280,12 @@ export default function CourseDetail({ loaderData }: Route.ComponentProps) {
             <h1 className="mb-3 text-4xl font-bold">{course.title}</h1>
             <p className="mb-4 text-lg text-muted-foreground">{course.description}</p>
             <div className="flex items-center gap-4 text-sm text-muted-foreground">
-              <span className="flex items-center gap-1">
-                <User className="size-4" />
+              <span className="flex items-center gap-1.5">
+                <UserAvatar
+                  name={course.instructorName}
+                  avatarUrl={course.instructorAvatarUrl}
+                  className="size-5"
+                />
                 {course.instructorName}
               </span>
               <span className="flex items-center gap-1">
@@ -333,7 +342,11 @@ export default function CourseDetail({ loaderData }: Route.ComponentProps) {
                       <span>{formatDuration(totalDuration, true, false, false)} total</span>
                     </div>
                     <div className="flex items-center gap-2">
-                      <User className="size-4" />
+                      <UserAvatar
+                        name={course.instructorName}
+                        avatarUrl={course.instructorAvatarUrl}
+                        className="size-5"
+                      />
                       <span>Taught by {course.instructorName}</span>
                     </div>
                     {course.instructorBio && (
