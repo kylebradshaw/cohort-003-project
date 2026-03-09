@@ -431,6 +431,10 @@ export async function action({ params, request }: Route.ActionArgs) {
       throw data("Failed to score quiz", { status: 500 });
     }
 
+    if (result.passed) {
+      awardXp(currentUserId, 5, "quiz_pass", quizId);
+    }
+
     return { quizResult: result };
   }
 
