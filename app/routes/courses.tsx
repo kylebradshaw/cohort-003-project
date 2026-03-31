@@ -15,6 +15,8 @@ import { getUserEnrolledCourses } from "~/services/enrollmentService";
 import { calculateProgress, getCompletedLessonCount } from "~/services/progressService";
 import { resolveCountry } from "~/lib/country.server";
 import { calculatePppPrice } from "~/lib/ppp";
+import { getRatingStatsForCourses } from "~/services/ratingService";
+import { StarRatingDisplay } from "~/components/star-rating";
 
 export function meta() {
   return [
@@ -55,17 +57,25 @@ export async function loader({ request }: Route.LoaderArgs) {
     }
   }
 
+  const ratingStatsMap = getRatingStatsForCourses(courses.map((c) => c.id));
+
   const coursesWithLessonCount = courses.map((course) => {
     const userProgress = progressMap.get(course.id);
     const pppPrice = course.pppEnabled
       ? calculatePppPrice(course.price, country)
       : course.price;
+    const ratingStats = ratingStatsMap.get(course.id) ?? {
+      averageRating: null,
+      totalRatings: 0,
+    };
     return {
       ...course,
       lessonCount: getLessonCountForCourse(course.id),
       progress: userProgress?.progress ?? null,
       completedLessons: userProgress?.completedLessons ?? null,
       pppPrice,
+      averageRating: ratingStats.averageRating,
+      totalRatings: ratingStats.totalRatings,
     };
   });
 
@@ -224,6 +234,14 @@ export default function CourseCatalog({ loaderData }: Route.ComponentProps) {
                         style={{ width: `${course.progress}%` }}
                       />
                     </div>
+                  </CardContent>
+                )}
+                {course.averageRating !== null && course.totalRatings > 0 && (
+                  <CardContent className="pt-0">
+                    <StarRatingDisplay
+                      averageRating={course.averageRating}
+                      totalRatings={course.totalRatings}
+                    />
                   </CardContent>
                 )}
                 <CardFooter className="flex items-center justify-between text-xs text-muted-foreground">

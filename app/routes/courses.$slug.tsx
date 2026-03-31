@@ -1,5 +1,5 @@
-import { useEffect } from "react";
-import { Link, useSearchParams } from "react-router";
+import { useEffect, useCallback } from "react";
+import { Link, useSearchParams, useFetcher } from "react-router";
 import { toast } from "sonner";
 import type { Route } from "./+types/courses.$slug";
 import {
@@ -42,6 +42,8 @@ import { formatDuration, formatPrice } from "~/lib/utils";
 import { renderMarkdown } from "~/lib/markdown.server";
 import { resolveCountry } from "~/lib/country.server";
 import { calculatePppPrice, getCountryTierInfo } from "~/lib/ppp";
+import { getCourseRatingStats, getRatingForUser } from "~/services/ratingService";
+import { StarRatingDisplay, StarRatingInput } from "~/components/star-rating";
 
 export function meta({ data: loaderData }: Route.MetaArgs) {
   const title = loaderData?.course?.title ?? "Course";
@@ -102,6 +104,11 @@ export async function loader({ params, request }: Route.LoaderArgs) {
     : courseWithDetails.price;
   const tierInfo = getCountryTierInfo(country);
 
+  const ratingStats = getCourseRatingStats(course.id);
+  const userRating = currentUserId
+    ? (getRatingForUser(currentUserId, course.id)?.rating ?? null)
+    : null;
+
   return {
     course: courseWithDetails,
     salesCopyHtml,
@@ -113,6 +120,8 @@ export async function loader({ params, request }: Route.LoaderArgs) {
     currentUserId,
     pppPrice,
     tierInfo,
+    ratingStats,
+    userRating,
   };
 }
 
@@ -181,7 +190,31 @@ export default function CourseDetail({ loaderData }: Route.ComponentProps) {
     currentUserId,
     pppPrice,
     tierInfo,
+    ratingStats,
+    userRating,
   } = loaderData;
+
+  const ratingFetcher = useFetcher();
+
+  const handleRate = useCallback(
+    (rating: number) => {
+      ratingFetcher.submit(
+        { courseId: course.id, rating },
+        {
+          method: "POST",
+          action: "/api/course-rating",
+          encType: "application/json",
+        }
+      );
+    },
+    [ratingFetcher, course.id]
+  );
+
+  // Optimistically reflect the submitted rating
+  const optimisticRating =
+    ratingFetcher.state !== "idle" && ratingFetcher.json
+      ? (ratingFetcher.json as { rating?: number }).rating ?? userRating
+      : userRating;
   const isInstructor = currentUserId === course.instructorId;
   const [searchParams, setSearchParams] = useSearchParams();
 
@@ -301,7 +334,7 @@ export default function CourseDetail({ loaderData }: Route.ComponentProps) {
         <p className="mb-4 text-lg text-muted-foreground">
           {course.description}
         </p>
-        <div className="flex items-center gap-4 text-sm text-muted-foreground">
+        <div className="flex flex-wrap items-center gap-4 text-sm text-muted-foreground">
           <span className="flex items-center gap-1.5">
             <UserAvatar
               name={course.instructorName}
@@ -320,7 +353,28 @@ export default function CourseDetail({ loaderData }: Route.ComponentProps) {
               {formatDuration(totalDuration, true, false, false)} total
             </span>
           )}
+          {ratingStats.averageRating !== null && ratingStats.totalRatings > 0 && (
+            <StarRatingDisplay
+              averageRating={ratingStats.averageRating}
+              totalRatings={ratingStats.totalRatings}
+            />
+          )}
         </div>
+        {enrolled && (
+          <div className="mt-4 flex items-center gap-3">
+            <span className="text-sm text-muted-foreground">Your rating:</span>
+            <StarRatingInput
+              currentRating={optimisticRating}
+              onRate={handleRate}
+              disabled={ratingFetcher.state !== "idle"}
+            />
+            {optimisticRating && (
+              <span className="text-xs text-muted-foreground">
+                {optimisticRating} / 5
+              </span>
+            )}
+          </div>
+        )}
       </div>
 
       {/* Two-column: sales copy left, sidebar right */}
