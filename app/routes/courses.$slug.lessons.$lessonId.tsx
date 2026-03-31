@@ -26,7 +26,9 @@ import {
   getBestAttempt,
 } from "~/services/quizService";
 import { computeResult } from "~/services/quizScoringService";
-import { LessonProgressStatus } from "~/db/schema";
+import { LessonProgressStatus, UserRole } from "~/db/schema";
+import { getCommentsForLesson } from "~/services/commentService";
+import { getUserById } from "~/services/userService";
 import { Button } from "~/components/ui/button";
 import { Card, CardContent } from "~/components/ui/card";
 import {
@@ -49,6 +51,7 @@ import {
 import { cn, formatDuration } from "~/lib/utils";
 import { renderMarkdown } from "~/lib/markdown.server";
 import { YouTubePlayer } from "~/components/youtube-player";
+import { CommentSection } from "~/components/comment-section";
 import { data, isRouteErrorResponse } from "react-router";
 import { z } from "zod";
 import { resolveCountry } from "~/lib/country.server";
@@ -203,6 +206,18 @@ export async function loader({ params, request }: Route.LoaderArgs) {
   const nextLesson =
     currentIndex < allLessons.length - 1 ? allLessons[currentIndex + 1] : null;
 
+  // Load comments for this lesson
+  const comments = getCommentsForLesson(lessonId);
+
+  // Determine instructor/admin status for comment moderation
+  let isInstructor = false;
+  let isAdmin = false;
+  if (currentUserId) {
+    isInstructor = currentUserId === course.instructorId;
+    const user = getUserById(currentUserId);
+    isAdmin = user?.role === UserRole.Admin;
+  }
+
   // Check for quiz attached to this lesson
   const quizRecord = getQuizByLessonId(lessonId);
   let quiz: {
@@ -281,6 +296,9 @@ export async function loader({ params, request }: Route.LoaderArgs) {
     pppBlocked,
     pppBlockedCountry,
     pppPurchaseCountry,
+    comments,
+    isInstructor,
+    isAdmin,
   };
 }
 
@@ -382,6 +400,9 @@ export default function LessonViewer({ loaderData }: Route.ComponentProps) {
     pppBlocked,
     pppBlockedCountry,
     pppPurchaseCountry,
+    comments,
+    isInstructor,
+    isAdmin,
   } = loaderData;
   const [autoplay, toggleAutoplay] = useAutoplay();
   const fetcher = useFetcher({ key: `mark-complete-${lesson.id}` });
@@ -591,6 +612,15 @@ export default function LessonViewer({ loaderData }: Route.ComponentProps) {
               )}
             </div>
           )}
+
+          {/* Comments Section */}
+          <CommentSection
+            lessonId={lesson.id}
+            comments={comments}
+            currentUserId={currentUserId}
+            isInstructor={isInstructor}
+            isAdmin={isAdmin}
+          />
 
           {/* Prev/Next Navigation */}
           <div className="flex items-center justify-between border-t pt-6">
