@@ -36,6 +36,13 @@
       "when": 1774919019883,
       "tag": "0004_shiny_nemesis",
       "breakpoints": true
+    },
+    {
+      "idx": 5,
+      "version": "6",
+      "when": 1774965424052,
+      "tag": "0005_smart_thing",
+      "breakpoints": true
     }
   ]
 }
