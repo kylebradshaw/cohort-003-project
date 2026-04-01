@@ -1,5 +1,5 @@
 import { data } from "react-router";
-import { z } from "zod";
+import * as v from "valibot";
 import type { Route } from "./+types/api.lesson-comments";
 import { getCurrentUserId } from "~/lib/session";
 import { parseJsonBody } from "~/lib/validation";
@@ -16,24 +16,24 @@ import {
 } from "~/services/commentService";
 import { getCourseById } from "~/services/courseService";
 
-const createSchema = z.object({
-  intent: z.literal("create"),
-  lessonId: z.number().int().positive(),
-  content: z.string().min(1).max(2000),
+const createSchema = v.object({
+  intent: v.literal("create"),
+  lessonId: v.pipe(v.number(), v.integer(), v.minValue(1)),
+  content: v.pipe(v.string(), v.minLength(1), v.maxLength(2000)),
 });
 
-const updateSchema = z.object({
-  intent: z.literal("update"),
-  commentId: z.number().int().positive(),
-  content: z.string().min(1).max(2000),
+const updateSchema = v.object({
+  intent: v.literal("update"),
+  commentId: v.pipe(v.number(), v.integer(), v.minValue(1)),
+  content: v.pipe(v.string(), v.minLength(1), v.maxLength(2000)),
 });
 
-const deleteSchema = z.object({
-  intent: z.literal("delete"),
-  commentId: z.number().int().positive(),
+const deleteSchema = v.object({
+  intent: v.literal("delete"),
+  commentId: v.pipe(v.number(), v.integer(), v.minValue(1)),
 });
 
-const actionSchema = z.discriminatedUnion("intent", [
+const actionSchema = v.variant("intent", [
   createSchema,
   updateSchema,
   deleteSchema,
