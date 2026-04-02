@@ -1,3 +1,139 @@
+# Plan: Instructor Analytics Dashboard
+
+> Source PRD: `.claude/prd/instructor-analytics-dashboard.md`
+
+## Architectural decisions
+
+- **Routes**: `/instructor/courses/analytics` (cross-course) and `/instructor/$courseId/analytics` (per-course); both accessible to the owning instructor or any admin
+- **Schema**: No new tables or migrations required — all analytics data lives in existing `purchases`, `enrollments`, `lessonProgress`, `videoWatchEvents`, `quizAttempts`, and `quizAnswers` tables
+- **Key models**: All monetary values stored and computed in cents; formatted to dollars only at render time. ISO 3166-1 alpha-2 country codes in `purchases.country`; displayed as human-readable names in UI
+- **Time range filtering**: `range` search param (`7d`, `30d`, `90d`, `all`); loaders translate to a `since` date before passing to service functions; default is `30d`
+- **Analytics service**: All query logic lives in `analyticsService.ts` with a companion `analyticsService.test.ts`; no query logic in route loaders
+- **Charting**: Recharts (via shadcn chart primitives) — not yet installed; added in Phase 2
+- **Authorization**: Instructor routes check session + user role via existing session/auth utilities; admins can view any instructor's data; unauthorized access throws 403
+
+---
+
+## Phase 1: Analytics Service Foundation
+
+**User stories**: 1, 2, 3, 4, 5, 6
+
+### What to build
+
+Create `analyticsService.ts` and its companion test file. No UI is built in this phase — the goal is a fully tested, read-only query layer that every subsequent phase will depend on.
+
+The service exposes functions for:
+- Revenue grouped by day/week/month over a time range, filterable by instructorId and/or courseId
+- Revenue broken down by country, filterable by instructorId and/or courseId
+- Enrollment counts over time, filterable by instructorId and/or courseId
+- Per-course summary (total revenue, total enrollments, completion rate) for a given instructor
+
+Time range is passed as a `since: Date | null` argument; `null` means all time. Grouping granularity (day/week/month) is determined by the range inside the service.
+
+Tests seed an in-memory SQLite database with known purchases, enrollments, and lesson progress records and assert exact return values. Edge cases — zero enrollments, no purchases, all students completing, sparse data at range boundaries — must all be covered.
+
+### Acceptance criteria
+
+- [ ] `analyticsService.ts` is created with all four function groups above
+- [ ] Every exported function has tests in `analyticsService.test.ts`
+- [ ] Edge cases covered: empty dataset, single record, time range boundary conditions, `null` (all-time) range
+- [ ] All functions accept an options object (no multiple positional params of the same type)
+- [ ] `npm test` passes with 100% coverage on `analyticsService.ts`
+
+---
+
+## Phase 2: Cross-Course Analytics Dashboard
+
+**User stories**: 1, 2, 3, 4, 5, 6, 7, 17, 18, 19, 21
+
+### What to build
+
+Add Recharts (via the shadcn chart integration). Build the `/instructor/courses/analytics` route end-to-end.
+
+The loader reads the `range` search param, calls `analyticsService` for revenue series, enrollment series, per-course summaries, and revenue by country, and returns all four datasets. Instructors see only their own courses; admins see all instructors and get an additional instructor filter dropdown populated from all instructor accounts.
+
+The page renders:
+- `TimeRangeSelector` — shared control that updates the `range` search param
+- `RevenueChart` — time-series chart of revenue over the selected range
+- `EnrollmentChart` — time-series chart of enrollments over the selected range
+- Per-course summary table — revenue total, enrollment total, completion rate, with a link to that course's analytics page
+- `CountryRevenueTable` — sortable table of country, revenue, purchase count
+
+A link to this page is added to the instructor dashboard so instructors can find it without knowing the URL.
+
+### Acceptance criteria
+
+- [ ] Recharts installed and a basic shadcn chart primitive renders without errors
+- [ ] `/instructor/courses/analytics` route exists and is protected (non-instructors get 403)
+- [ ] Loader returns `revenueSeries`, `enrollmentSeries`, `courseSummaries`, `revenueByCountry`, `selectedRange`
+- [ ] `TimeRangeSelector` updates the page data when a range is chosen; defaults to `30d`
+- [ ] `RevenueChart` and `EnrollmentChart` render the time-series data
+- [ ] Per-course summary table links each row to `/instructor/$courseId/analytics`
+- [ ] `CountryRevenueTable` displays human-readable country names (not raw ISO codes)
+- [ ] Admins can see all instructors' data and filter by instructor
+- [ ] Navigation link from the instructor dashboard index to this page
+
+---
+
+## Phase 3: Per-Course Analytics — Service Layer & Route
+
+**User stories**: 8, 9, 10, 11, 15, 16, 17, 20, 22
+
+### What to build
+
+Extend `analyticsService.ts` with all per-course query functions (and full tests for each):
+- **Course completion rate**: distinct students who have a `completed` `lessonProgress` record for every lesson in the course, divided by total enrolled students
+- **Lesson drop-off**: for each lesson in position order, the count of distinct students with a `completed` progress record divided by total enrolled students
+- **Video abandonment**: for each lesson, the median stop position in seconds and a bucket distribution of stop positions, sourced from `videoWatchEvents` where `eventType` is `pause` or `ended`
+
+Build the `/instructor/$courseId/analytics` route. The loader calls `analyticsService` for all of the above plus revenue series, enrollment series, and revenue by country (scoped to the course). The page shares the `TimeRangeSelector` from Phase 2 and renders:
+- Overall completion rate as a stat
+- `LessonDropoffChart` — horizontal bar or funnel chart in lesson-position order, showing per-lesson completion percentage, with the highest-abandonment lesson called out
+- `VideoAbandonmentChart` — histogram of stop-position buckets per lesson; lessons with no watch events are omitted
+- Revenue trend, enrollment trend, and country revenue (reusing Phase 2 components)
+
+Admins can view this page for any course; instructors can only view their own courses.
+
+### Acceptance criteria
+
+- [ ] Completion rate, lesson drop-off, and video abandonment functions added to `analyticsService.ts` with tests, including edge cases (zero enrollments, all students complete, no watch events, sparse event data)
+- [ ] `/instructor/$courseId/analytics` route exists and is protected; admins bypass ownership check
+- [ ] Loader returns completion rate, `lessonDropoff` array in position order, `videoAbandonment` array, plus revenue/enrollment/country data scoped to the course
+- [ ] `LessonDropoffChart` renders lessons in correct order; highest-abandonment lesson is highlighted
+- [ ] `VideoAbandonmentChart` renders per-lesson histograms; lessons with no data are omitted
+- [ ] `TimeRangeSelector` applies to revenue and enrollment series on this page
+- [ ] `npm test` passes with 100% coverage on new `analyticsService` functions
+
+---
+
+## Phase 4: Quiz Analytics
+
+**User stories**: 12, 13, 14
+
+### What to build
+
+Extend `analyticsService.ts` with quiz analytics queries (and tests):
+- Per-quiz pass rate: `passed` attempt count / total attempt count, filterable by courseId
+- Per-quiz attempt count
+- Per-question correct rate: `quizAnswers` where the selected option `isCorrect = true` / total answers for that question
+
+Add `QuizPassRateTable` to the per-course analytics page — a table of quizzes showing pass rate and attempt count, with each row expandable to show per-question correct rates.
+
+Tests must cover: no attempts, 100% pass rate, 0% pass rate, mixed question performance, and quizzes with no questions.
+
+### Acceptance criteria
+
+- [ ] Quiz analytics functions added to `analyticsService.ts` with tests covering all edge cases
+- [ ] `quizStats` array included in the `/instructor/$courseId/analytics` loader response
+- [ ] `QuizPassRateTable` renders each quiz with pass rate and attempt count
+- [ ] Each quiz row is expandable to reveal per-question correct rates
+- [ ] Quizzes with zero attempts display clearly (not as 0% pass rate)
+- [ ] `npm test` passes with 100% coverage on new `analyticsService` functions
+
+<!--
+
+SANS /prd-to-plan APPROACH
+
 # Instructor Analytics Dashboard — Implementation Plan
 
 Source PRD: `prd/instructor-analytics-dashboard.md`
@@ -301,3 +437,5 @@ When "All Instructors" selected: `instructorId` param absent → aggregate acros
 | `app/routes.ts` | Register two new routes | 3 + 4 |
 | `app/routes/instructor.index.tsx` (or dashboard) | Add Analytics nav link | 5 |
 | `app/routes/instructor.$courseId.tsx` | Add Analytics button | 5 |
+
+-->

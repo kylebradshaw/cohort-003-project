@@ -20,7 +20,9 @@ export default [
     ),
     route("instructor", "routes/instructor.tsx"),
     route("instructor/new", "routes/instructor.new.tsx"),
+    route("instructor/courses/analytics", "routes/instructor.courses.analytics.tsx"),
     route("instructor/:courseId", "routes/instructor.$courseId.tsx"),
+    route("instructor/:courseId/analytics", "routes/instructor.$courseId.analytics.tsx"),
     route(
       "instructor/:courseId/lessons/:lessonId",
       "routes/instructor.$courseId.lessons.$lessonId.tsx"

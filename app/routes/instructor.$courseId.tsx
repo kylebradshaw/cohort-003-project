@@ -54,6 +54,7 @@ import {
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "~/components/ui/tabs";
 import {
   ArrowLeft,
+  BarChart2,
   BookOpen,
   Clock,
   Eye,
@@ -1171,6 +1172,13 @@ export default function InstructorCourseEditor({
           <span className="text-xs text-muted-foreground">
             Slug: /courses/{course.slug}
           </span>
+          <Link
+            to={`/instructor/${course.id}/analytics`}
+            className="ml-auto flex items-center gap-1.5 rounded-md border px-3 py-1 text-xs font-medium hover:bg-muted"
+          >
+            <BarChart2 className="size-3.5" />
+            Analytics
+          </Link>
         </div>
       </div>
 
