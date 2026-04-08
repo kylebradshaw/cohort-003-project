@@ -52,10 +52,12 @@ export async function loader({ request }: Route.LoaderArgs) {
     : [];
 
   const isInstructor = currentUser?.role === UserRole.Instructor;
-  const notifications = isInstructor && currentUserId
+  const userIsTeamAdmin = currentUserId ? isTeamAdmin(currentUserId) : false;
+  const showNotifications = (isInstructor || userIsTeamAdmin) && currentUserId;
+  const notifications = showNotifications
     ? getNotifications(currentUserId, 5, 0)
     : [];
-  const unreadNotificationCount = isInstructor && currentUserId
+  const unreadNotificationCount = showNotifications
     ? getUnreadCount(currentUserId)
     : 0;
 
@@ -73,7 +75,7 @@ export async function loader({ request }: Route.LoaderArgs) {
     devCountry,
     countryTierInfo,
     countries: COUNTRIES,
-    isTeamAdmin: currentUserId ? isTeamAdmin(currentUserId) : false,
+    isTeamAdmin: userIsTeamAdmin,
     notifications,
     unreadNotificationCount,
   };

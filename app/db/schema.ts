@@ -25,6 +25,7 @@ export enum QuestionType {
 
 export enum NotificationType {
   Enrollment = "enrollment",
+  CouponRedemption = "coupon_redemption",
 }
 
 export enum TeamMemberRole {
