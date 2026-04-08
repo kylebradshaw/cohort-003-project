@@ -43,6 +43,13 @@
       "when": 1774965424052,
       "tag": "0005_smart_thing",
       "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "6",
+      "when": 1775614614849,
+      "tag": "0006_old_johnny_storm",
+      "breakpoints": true
     }
   ]
 }

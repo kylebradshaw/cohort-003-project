@@ -7,7 +7,10 @@ import {
   lessons,
   lessonProgress,
   LessonProgressStatus,
+  NotificationType,
+  users,
 } from "~/db/schema";
+import { createNotification } from "~/services/notificationService";
 
 // ─── Enrollment Service ───
 // Handles enrollment, unenrollment, duplicate prevention, and enrollment validation.
@@ -86,6 +89,28 @@ export function enrollUser(
     .values({ userId, courseId })
     .returning()
     .get();
+
+  // Create notification for the course instructor
+  const course = db
+    .select()
+    .from(courses)
+    .where(eq(courses.id, courseId))
+    .get();
+  const student = db
+    .select()
+    .from(users)
+    .where(eq(users.id, userId))
+    .get();
+
+  if (course && student) {
+    createNotification({
+      recipientUserId: course.instructorId,
+      type: NotificationType.Enrollment,
+      title: "New Enrollment",
+      message: `${student.name} enrolled in ${course.title}`,
+      linkUrl: `/instructor/${courseId}/students`,
+    });
+  }
 
   // sendEmail parameter accepted but not implemented (no email service — PRD out of scope)
   if (sendEmail) {
