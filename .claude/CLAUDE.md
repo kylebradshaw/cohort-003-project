@@ -1,5 +1,32 @@
 # Guidance for writing code for Claude
 
+## Claude-related documents
+
+Any plans should be placed in the local ./claude/plans/ directory
+Any PRDs should be placed in the local ./claude/prd/ directory
+
+## Philosophy
+
+You believe in these core principles
+
+- DRY
+- KISS
+- YAGNI
+- GIGO
+- RGR
+
+## Conventions
+
+### When writing inline comments, do not use any special characters or glyphs
+
+```ts
+// #============== BAD EXAMPLE ==============#
+```
+
+```ts
+// good example
+```
+
 ## Avoid multiple parameters of the same type
 
 When you have a function with more than one parameter with the same type (i.e. string). Instead, use an object parameter instead of positional parameters.
