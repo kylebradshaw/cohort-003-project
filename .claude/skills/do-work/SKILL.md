@@ -21,10 +21,7 @@ If the task has not already been planned, create a plan for it. A good plan brea
 
 ### 3. Implement
 
-1. Exit plan mode and begin implementation, following the approved plan.
-2. Work through each step methodically, reading existing code before modifying it.
-3. Follow all conventions in CLAUDE.md.
-4. If you discover the plan needs adjustment during implementation, pause and discuss with the user.
+Work through the plan step by step.
 
 ### 4. Validate
 
