@@ -22,12 +22,16 @@ export function createNotification(opts: {
     .get();
 }
 
-export function getNotifications(userId: number, limit: number, offset: number) {
+export function getNotifications(
+  userId: number,
+  limit: number,
+  offset: number
+) {
   return db
     .select()
     .from(notifications)
     .where(eq(notifications.recipientUserId, userId))
-    .orderBy(desc(notifications.createdAt))
+    .orderBy(desc(notifications.id))
     .limit(limit)
     .offset(offset)
     .all();
